@@ -1,23 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"strings"
 	"testing"
 )
 
 func TestContainsCyrillicOrLatin(t *testing.T) {
-	testData := map[string]bool{
-		"Hello":  true,
-		"Привет": true,
-		"123":    false,
-		"":       false,
+	testCases := []struct {
+		input    string
+		expected bool
+	}{
+		{"Hello", true},
+		{"Привет", true},
+		{"123", false},
+		{"", false},
 	}
 
-	for input, expected := range testData {
-		result := containsCyrillicOrLatin(input)
-		if result != expected {
-			t.Errorf("containsCyrillicOrLatin(%s) = %t; want %t", input, result, expected)
+	for _, tc := range testCases {
+		result := containsCyrillicOrLatin(tc.input)
+		if result != tc.expected {
+			t.Errorf("containsCyrillicOrLatin(%s) = %t; want %t", tc.input, result, tc.expected)
 		}
 	}
 }
@@ -28,53 +32,40 @@ func TestRandomWord(t *testing.T) {
 		"banana": "банан",
 	}
 
-	// Test that randomWord returns a value from the map
-	result := randomWord(testMap)
-	if _, ok := testMap[result]; !ok {
-		t.Errorf("randomWord did not return a value from the provided map")
+	var buf bytes.Buffer
+	oldStdout := os.Stdout
+	os.Stdout = &buf
+
+	randomWord(testMap)
+
+	os.Stdout = oldStdout
+
+	output := buf.String()
+	expectedOutput := "Переведи apple:\n"
+	if !strings.Contains(output, expectedOutput) {
+		t.Errorf("randomWord did not print the expected output: %s", expectedOutput)
 	}
 }
 
-func TestCheckWord(t *testing.T) {
-	// Mock user input using a strings.Reader
-	userInput := "banana\n"
-	inputReader := strings.NewReader(userInput)
-
+func TestMainFunc(t *testing.T) {
 	// Redirect Stdin for testing
 	oldStdin := os.Stdin
 	defer func() { os.Stdin = oldStdin }()
-	os.Stdin = inputReader
+	input := "apple=яблоко\nbanana=банан\ndone\nbanana\nbanana\ndone\n"
+	os.Stdin = strings.NewReader(input)
 
-	// Capture output for testing
-	output := captureOutput(func() {
-		v := "банан"
-		checkWord(v)
-	})
+	var buf bytes.Buffer
+	oldStdout := os.Stdout
+	os.Stdout = &buf
 
-	expectedOutput := "Wrong, try again\n"
+	main()
+
+	os.Stdout = oldStdout
+
+	output := buf.String()
+
+	expectedOutput := "Correct! Try next word\nMap contents:\napple: яблоко\nbanana: банан\n"
 	if output != expectedOutput {
-		t.Errorf("checkWord output: %s; want %s", output, expectedOutput)
+		t.Errorf("main function did not produce the expected output: %s", expectedOutput)
 	}
-}
-
-// Helper function to capture stdout
-func captureOutput(f func()) string {
-	res := ""
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	f()
-
-	w.Close()
-	os.Stdout = os.Stdout
-
-	buf := make([]byte, 1024)
-	for {
-		n, _ := r.Read(buf)
-		if n == 0 {
-			break
-		}
-		res += string(buf[:n])
-	}
-	return res
 }
