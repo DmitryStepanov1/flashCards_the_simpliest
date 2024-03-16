@@ -16,6 +16,7 @@ func TestContainsCyrillicOrLatin(t *testing.T) {
 		{"Привет", true},
 		{"123", false},
 		{"", false},
+		{"$%*", false},
 	}
 
 	for _, tc := range testCases {
