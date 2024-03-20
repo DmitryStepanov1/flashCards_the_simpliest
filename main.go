@@ -37,7 +37,7 @@ func main() {
 	// Create a scanner to read input from terminal
 	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Println("Enter key-value pairs (key=value) separated by newline. Enter 'done' to finish:")
+	fmt.Println("Enter key-value pairs (key:value) separated by newline. Enter 'done' to finish:")
 
 	// Keep reading input until the user enters 'done'
 	for {
@@ -51,7 +51,7 @@ func main() {
 		}
 
 		// Split input by "=" to separate key and value
-		parts := strings.Split(input, "=")
+		parts := strings.Split(input, ":")
 		if len(parts) != 2 || len(parts[0]) == 0 || len(parts[1]) == 0 || containsCyrillicOrLatin(parts[0]) == false || containsCyrillicOrLatin(parts[1]) == false {
 			fmt.Println("Invalid input format. Please use 'key=value' format.")
 			continue
