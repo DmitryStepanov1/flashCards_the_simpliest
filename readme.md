@@ -17,5 +17,8 @@ Other versions TBD:
 ...
 Think about other versions:
 
+- Create common lib/functions for a few flashcards programs versions: dataValidation (can be JSON, text-file, manual input), Dictation with random func (?)
+- Text-file input
 - Provide an output file for added words
 - Create DB backup
+- Performance testing
